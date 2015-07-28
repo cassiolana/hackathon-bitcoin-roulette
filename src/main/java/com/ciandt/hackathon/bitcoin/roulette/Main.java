@@ -1,77 +1,30 @@
 package com.ciandt.hackathon.bitcoin.roulette;
 
-import java.io.IOException;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.http.*;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.*;
+import javax.servlet.ServletRegistration;
 
-public class Main extends HttpServlet {
-	private static final long serialVersionUID = 825084206764426105L;
+import org.springframework.web.WebApplicationInitializer;
+import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
+
+public class Main implements WebApplicationInitializer {
 
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-		if (req.getRequestURI().endsWith("/db")) {
-			showDatabase(req, resp);
-		} else {
-			showHome(req, resp);
-		}
+	public void onStartup(ServletContext servletContext) throws ServletException {
+		WebApplicationContext context = getContext();
+        servletContext.addListener(new ContextLoaderListener(context));
+        ServletRegistration.Dynamic dispatcher = servletContext.addServlet("DispatcherServlet", new DispatcherServlet(context));
+        dispatcher.setLoadOnStartup(1);
+        dispatcher.addMapping("/*");
 	}
 
-	private void showHome(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		resp.getWriter().print("Hello from Java!");
-	}
-
-	private void showDatabase(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Connection connection = null;
-		try {
-			connection = getConnection();
-
-			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)");
-			stmt.executeUpdate("INSERT INTO ticks VALUES (now())");
-			ResultSet rs = stmt.executeQuery("SELECT tick FROM ticks");
-
-			String out = "Hello!\n";
-			while (rs.next()) {
-				out += "Read from DB: " + rs.getTimestamp("tick") + "\n";
-			}
-
-			resp.getWriter().print(out);
-		} catch (Exception e) {
-			resp.getWriter().print("There was an error: " + e.getMessage());
-		} finally {
-			if (connection != null)
-				try {
-					connection.close();
-				} catch (SQLException e) {
-				}
-		}
-	}
-
-	private Connection getConnection() throws URISyntaxException, SQLException {
-		URI dbUri = new URI(System.getenv("DATABASE_URL"));
-
-		String username = dbUri.getUserInfo().split(":")[0];
-		String password = dbUri.getUserInfo().split(":")[1];
-		int port = dbUri.getPort();
-
-		String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
-
-		return DriverManager.getConnection(dbUrl, username, password);
-	}
-
-	public static void main(String[] args) throws Exception {
-		Server server = new Server(Integer.valueOf(System.getenv("PORT")));
-		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-		context.setContextPath("/");
-		server.setHandler(context);
-		context.addServlet(new ServletHolder(new Main()), "/*");
-		server.start();
-		server.join();
-	}
+    private AnnotationConfigWebApplicationContext getContext() {
+        AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
+        ctx.setConfigLocation("com.ciandt.hackathon.bitcoin.roulette");
+        ctx.register(RoulleteConfig.class);
+        return ctx;
+    }
 }

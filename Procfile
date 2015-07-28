@@ -1,1 +1,1 @@
-web:    java -cp target/classes:target/dependency/* com.ciandt.hackathon.bitcoin.roulette.Main
+web: java $JAVA_OPTS -jar target/dependency/jetty-runner.jar --port $PORT target/*.war
