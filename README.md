@@ -1,6 +1,10 @@
 spring-heroku-app
 =================
 
+Url Heroku: https://dashboard.heroku.com/apps/hackathon-bitcoin-roulette/
+Url APP: https://hackathon-bitcoin-roulette.herokuapp.com/
+Travis: 
+
 Token para o reporitório: 4c3dfc9f655d6dd77717af9775b8c44ceb0434c 4
 
 
@@ -14,3 +18,4 @@ heroku deploy:war --war target/bitcoin-roulette-1.0-SNAPSHOT.war --app hackathon
 https://github.com/loki2302/spring-heroku-app
 
 Executar localmente: mvn jetty:run
+
