@@ -10,9 +10,28 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class RoulleteService {
 
-	@RequestMapping(value = "/", method = RequestMethod.GET)
+	@RequestMapping(value = "/schedule")
     @ResponseBody
-    public String healthcheck() {
+    public String schedule() {
+	    
+        return "OK";
+    }
+	
+	@RequestMapping(value = "/schedule/check", method = RequestMethod.GET)
+    @ResponseBody
+    public String checkScheduled() {
         return UUID.randomUUID().toString();
+    }
+	
+	@RequestMapping(value = "/result", method = RequestMethod.PUT)
+    @ResponseBody
+    public String setResult() {
+        return "OK";
+    }
+
+    @RequestMapping(value = "/result", method = RequestMethod.GET)
+    @ResponseBody
+    public String getResult() {
+        return "20";
     }
 }

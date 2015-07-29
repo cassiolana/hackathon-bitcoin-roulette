@@ -18,11 +18,26 @@ public class InfoService {
 	@Value("${build.date}")
 	private String buildDate;
 	
-	@RequestMapping("/info")
+	@RequestMapping("/")
     @ResponseBody
     public String info() {
-		version = env.getProperty("version");
-		buildDate = env.getProperty("build.date");
-        return String.format("Versão da aplicação: %s<br>Data do build: %s", version, buildDate);
+	    version = env.getProperty("version");
+	    buildDate = env.getProperty("build.date");
+	    StringBuilder sb = new StringBuilder();
+	    sb.append("Operações disponíveis:");
+        sb.append("<BR/>");
+		sb.append("ALL /schedule");
+		sb.append("<BR/>");
+		sb.append("GET /schedule/check");
+        sb.append("<BR/>");
+		sb.append("GET /result");
+        sb.append("<BR/>");
+        sb.append("PUT /result");
+        sb.append("<BR/><BR/>");
+        sb.append("Versão da aplicação: %s");
+        sb.append("<BR/>");
+        sb.append("Data do build: %s");
+        
+        return String.format(sb.toString(), version, buildDate);
     }
 }
