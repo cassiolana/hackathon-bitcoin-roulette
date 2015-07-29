@@ -12,6 +12,8 @@
 		<spring.version>4.0.2.RELEASE</spring.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<timestamp>${maven.build.timestamp}</timestamp>
 	</properties>
 
 	<dependencies>
@@ -31,8 +33,14 @@
 			<version>3.0.1</version>
 		</dependency>
 	</dependencies>
-	
+
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -43,7 +51,7 @@
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -51,39 +59,48 @@
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 				</configuration>
 			</plugin>
-			
+
+			<!-- Jetty -->
+
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.0.6.v20130930</version>
+				<configuration>
+					<httpConnector>
+						<port>8080</port>
+						<host>localhost</host>
+					</httpConnector>
+					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<webAppConfig>
+						<contextPath>/</contextPath>
+					</webAppConfig>
+				</configuration>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<version>2.4</version>
 				<executions>
 					<execution>
-						<id>copy-dependencies</id>
 						<phase>package</phase>
 						<goals>
-							<goal>copy-dependencies</goal>
+							<goal>copy</goal>
 						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.eclipse.jetty</groupId>
+									<artifactId>jetty-maven-plugin</artifactId>
+									<version>9.0.6.v20130930</version>
+									<destFileName>jetty-runner.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-			
-            <!-- Jetty -->
-
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.0.6.v20130930</version>
-                <configuration>
-                    <httpConnector>
-                        <port>8080</port>
-                        <host>localhost</host>
-                    </httpConnector>
-                    <scanIntervalSeconds>10</scanIntervalSeconds>
-					<webAppConfig>
-						<contextPath>/</contextPath>
-					</webAppConfig>
-                </configuration>
-            </plugin>
 		</plugins>
 	</build>
 </project>

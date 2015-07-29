@@ -10,7 +10,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-public class Main implements WebApplicationInitializer {
+public class ApplicationInitializer implements WebApplicationInitializer {
 
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
@@ -24,7 +24,7 @@ public class Main implements WebApplicationInitializer {
     private AnnotationConfigWebApplicationContext getContext() {
         AnnotationConfigWebApplicationContext ctx = new AnnotationConfigWebApplicationContext();
         ctx.setConfigLocation("com.ciandt.hackathon.bitcoin.roulette");
-        ctx.register(RoulleteConfig.class);
+        ctx.register(ApplicationConfig.class);
         return ctx;
     }
 }
