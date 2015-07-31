@@ -1,58 +1,86 @@
-#include <SPI.h>
-#include <Ethernet.h>
+//http://pt.scribd.com/doc/33640211/ArduinoLcdSensorIR#scribd
+#include <LiquidCrystal.h>
 
-byte mac[] = { 0x90, 0xA2, 0xDA, 0x0F, 0x26, 0x9F };
-char server[] = "172.16.96.21";
-IPAddress ip(192,168,0,177);
-EthernetClient client;
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+int engine = 8;
+
+int analogPin = A0;
+int val = 0;
+int v = 5;
+int r1 = 10000;
+int r2aux = 1000;
+
+String inputString = "";
+boolean stringComplete = false;
 int loops = 1;
 void setup() {
   Serial.begin(9600);
-
-  if (Ethernet.begin(mac) == 0) {
-    Serial.println("Failed to configure Ethernet using DHCP");
-    Ethernet.begin(mac, ip);
-  }
+  inputString.reserve(200);
+  
+  pinMode(engine, OUTPUT);
+  
+  lcd.begin(16, 2);
+  lcd.print("Posicao:  0");
 }
 
 void loop() {
-  Serial.print("--------------------LOOP ");
-  Serial.print(loops++);
-  Serial.println("------------------------");
-  checkSchedule();
-  delay(5000);
+  int result = readPosition();
+
+  lcd.setCursor(10, 0);
+  lcd.print("      ");
+  lcd.setCursor(10, 0);
+  lcd.print(result);
+  Serial.println(result);
+  
+  
+  if (stringComplete) {
+    startEngine();
+
+    delay(1000);
+
+    lcd.setCursor(0, 1);
+    lcd.print("            ");
+
+    lcd.setCursor(0, 1);
+    lcd.print(inputString);
+    
+    inputString = "";
+    stringComplete = false;
+  }
+
+  lcd.setCursor(12, 1);  
+  lcd.print(loops++);
+  
+  delay(1000);
 }
 
-boolean checkSchedule() {
-  if (client.connect(server, 8080)) {
-    Serial.println("connected");
-    client.println("GET /schedule/check HTTP/1.1");
-    client.println("Host: 172.16.96.21");
-    client.println("Connection: close");
-    client.println();
-  } else {
-    Serial.println("connection failed");
-  }
-  
-  int init = millis();
-  int lastRead;
-  int timeout = 1000;
-  while(client.connected()){
-    if (client.available()) {
-      char c = client.read();
-      Serial.print(c);
-      lastRead = millis();
+void serialEvent() {
+  while (Serial.available()) {
+    char inChar = (char)Serial.read(); 
+    if (inChar == '\n') {
+      stringComplete = true;
     } else {
-      if(millis() - init > timeout) {
-        Serial.println();
-        Serial.println("End of the response stream");
-        break;
-      }
+      inputString += inChar;
     }
   }
-  Serial.println();
-  Serial.println("disconnecting.");
-  client.stop();
-  client.flush();
+}
+
+
+int readPosition(){
+  val = analogRead(analogPin);
+  double vout = val * (5.0 / 1023);
+  int r2 =  r1 * (1 / (v/vout - 1));
+  int pos = r2/r2aux;
+  int resto = r2 % r2aux;
+  if (resto > 500) {
+    pos = pos + 1;
+  }
+  return pos;
+}
+
+void startEngine() {
+  digitalWrite(engine, HIGH);
+  delay(3000);
+  digitalWrite(engine, LOW);
 }
