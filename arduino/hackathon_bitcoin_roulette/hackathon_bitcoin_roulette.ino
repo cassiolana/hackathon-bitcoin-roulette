@@ -35,7 +35,7 @@ void loop() {
   
   
   if (stringComplete) {
-    startEngine();
+    startEngine(inputString);
 
     delay(1000);
 
@@ -79,8 +79,8 @@ int readPosition(){
   return pos;
 }
 
-void startEngine() {
+void startEngine(String time) {
   digitalWrite(engine, HIGH);
-  delay(3000);
+  delay(time.toInt());
   digitalWrite(engine, LOW);
 }
